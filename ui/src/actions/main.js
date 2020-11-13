@@ -6,8 +6,17 @@ import {
   signDaiConvert,
   signChaiConvert,
   batchSignData,
+  getDaiChequeWithPermitData,
   setTxMinedInterval
 } from '../utils/web3Utils';
+
+
+import {
+    relayParams,
+    relay
+  } from '../utils/rocksideAPI';
+
+
 
 import {
   daiCheque,
@@ -24,34 +33,70 @@ import {
   chaiPermitAndConvert
 } from '../utils/apiUtils';
 
+import config from '../config.json';
+
 export const newDaiTransfer = async function() {
     const { store } = this.props
     const dachApproved = store.get('dach.daiApproved')
 
+    
+
     store.set('cheque.requesting', true)
 
-    if (!dachApproved) {
+       console.log(dachApproved);
+    //if (!dachApproved) {
         try {
+
+            const params = await relayParams.bind(this)()
+            console.log(params.speeds.fastest.relayer);
+        
+            store.set('relayer', params.speeds.fastest.relayer)
+           
             const signedPermit = await signDachTransferPermit.bind(this)(true, 'dai')
             try {
                 // metamask race condition
+
+                store.set('cheque.networkRequesting', true)
+
                 setTimeout(async () => {
                     const signedCheque = await signDaiCheque.bind(this)()
 
-                    store.set('cheque.networkRequesting', true)
+                   
+                    await getDaiChequeWithPermitData.bind(this)(signedPermit, signedCheque)
+                    const data = store.get('withPermit.daiCheque')
+
+        
                     // POST /permit_and_transfer
-                    const result = await daiPermitAndCheque({
+
+                    /*const web3 = store.get('web3')
+
+                    await web3.eth.sendTransaction({
+                        from: store.get('walletAddress'),
+                        to: config.WITH_PERMIT,
+                        data: data
+                    }, function(error, hash){
+                        console.log(error)
+                       console.log(hash)
+                    });*/
+
+                   
+
+                    /*const result = await daiPermitAndCheque({
                         permit: signedPermit,
                         cheque: signedCheque
-                    })
-                    store.set('cheque.result', result)
+                    })*/
+
+                    const relayResponse = await relay.bind(this)(data)
+                    console.log(relayResponse);
+
+                    //store.set('cheque.result', result)
                     store.set('cheque.requesting', false)
                     store.set('cheque.networkRequesting', false)
-                    if (result.success === 'true' && result.message.chequeHash) {
+                    /*if (result.success === 'true' && result.message.chequeHash) {
                         setTxMinedInterval('cheque', result.message.chequeHash, store)
-                    }
+                    }*/
                     // console.log('daiPermitAndCheque', result)
-                }, 10)
+                }, 30)
             } catch(e) {
                 // console.log(e)
                 store.set('cheque.requesting', false)
@@ -61,7 +106,7 @@ export const newDaiTransfer = async function() {
             // console.log(e)
             store.set('cheque.requesting', false)
         }
-    } else {
+    /*} else {
         try {
             const signedCheque = await signDaiCheque.bind(this)()
             // console.log('signedCheque', signedCheque)
@@ -79,7 +124,7 @@ export const newDaiTransfer = async function() {
             store.set('cheque.requesting', false)
             store.set('cheque.networkRequesting', false)
         }
-    }
+    }*/
 }
 
 export const newChaiTransfer = async function() {

@@ -7,6 +7,7 @@ import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 //import { PortisConnector } from "@web3-react/portis-connector";
 
 import daiABI from '../utils/daiABI.json';
+import withPermitABI from '../utils/withPermit.json';
 import chaiABI from '../utils/chaiABI.json';
 import dachABI from '../utils/dachABI.json';
 import potABI from '../utils/potABI.json';
@@ -15,6 +16,7 @@ import {
   gasPrice
 } from '../utils/apiUtils';
 
+const withPermitAddress  = config.WITH_PERMIT;
 const daiAddress  = config.DAI;
 const potAddress  = config.POT;
 const chaiAddress = config.CHAI;
@@ -45,6 +47,27 @@ export const walletConnectConnector = new WalletConnectConnector({
 // });
 
 // network data
+
+export const getDaiChequeWithPermitData = async function(signedPermit, signedDaiCheque) {
+    const { store } = this.props
+    const web3 = store.get('web3')
+    const withPermit = new web3.eth.Contract(withPermitABI, withPermitAddress);
+
+    const daiChequeData = await withPermit.methods.daiCheque(signedDaiCheque.sender, 
+        signedDaiCheque.receiver, 
+        signedDaiCheque.amount,
+        signedDaiCheque.fee,
+        signedDaiCheque.nonce,
+        signedDaiCheque.expiry,
+        signedDaiCheque.relayer,
+        signedDaiCheque.v,
+        signedDaiCheque.r,
+        signedDaiCheque.s,
+        [signedPermit.holder, signedPermit.spender, signedPermit.nonce, signedPermit.expiry, signedPermit.allowed, signedPermit.v, signedPermit.r, signedPermit.s]
+        ).encodeABI();
+    store.set('withPermit.daiCheque', daiChequeData)
+}
+
 export const getDaiData = async function() {
     const { store } = this.props
     const web3 = store.get('web3')
@@ -169,7 +192,7 @@ export const createChequeMessageData = function() {
         fee: fee,
         nonce: nonce,
         expiry: expiry,
-        relayer: relayer
+        relayer: store.get("relayer")
     }
 
     // console.log('message', message)
