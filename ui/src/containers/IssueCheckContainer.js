@@ -415,25 +415,10 @@ class IssueCheckContainer extends React.Component {
                         <Grid className={classes.actionsContainer} container="container" justify='center'>
                             <Grid item xs={12} sm={12} md={7} className={classes.contentContainer}>
                                 <Grid container justify='center'>
-                                    <Grid item xs={12} className={classes.tabs}>
-                                        <Tabs
-                                          orientation="horizontal"
-                                          variant="fullWidth"
-                                          textColor="secondary"
-                                          value={selectedActionTab}
-                                          onChange={this.switchActionTab.bind(this)}
-                                        >
-                                          <Tab label="Send" icon={<ArrowRightIcon />} />
-                                          <Tab label="Swap" icon={<SwapIcon />} />
-                                          <Tab label="Convert" icon={<LoopIcon />} />
-                                        </Tabs>
-                                    </Grid>
+              
                                     {selectedActionTab === 0 && <Grid item xs={12} sm={12} md={12}>
                                         <div className={classes.panel}>
-                                            <ToggleButtonGroup className={classes.toggleHeader} size="large" value={chequeCurrency} exclusive onChange={this.switchSendTab.bind(this)}>
-                                                <ToggleButton value={'dai'}>Send DAI</ToggleButton>
-                                                <ToggleButton value={'chai'}>Send CHAI</ToggleButton>
-                                            </ToggleButtonGroup>
+                                        
                                             <div>
                                                 <Typography variant='subtitle2'>Send to Address</Typography>
                                                 <TextField inputRef={this.chequeDestRef} placeholder='Enter address' className={classes.input} margin="normal" variant="outlined" onChange={(event) => {

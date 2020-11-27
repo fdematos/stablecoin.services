@@ -7,7 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 
-import Bell from '../assets/bell_resized.png'
+import DaiLogo from '../assets/dai-logo.png'
 import bellsound from '../assets/bellsound.m4a'
 
 const styles = () => ({
@@ -81,10 +81,10 @@ class NavContainer extends React.Component {
             {<Grid className={classes.navContainer} container alignItems='center'>
               <Grid item xs={12} sm={8}>
                   <Grid container alignItems='center'>
-                      <img className={classes.logo} src={Bell} onClick={this.playBellSound.bind(this)}/>
+                      <img className={classes.logo} src={DaiLogo} width="100px" onClick={this.playBellSound.bind(this)}/>
                       <div className={classes.logoText}>
-                          <Typography className={classes.headerText} variant='body'>stablecoin.services</Typography>
-                          <Typography className={classes.headerSubtitle} variant='p'>A gas-free offering of common Dai and Chai&nbsp;operations</Typography>
+                          <Typography className={classes.headerText} variant='body'>Rockside DAI Service</Typography>
+                          <Typography className={classes.headerSubtitle} variant='p'>A gas-free sending service </Typography>
                       </div>
                   </Grid>
               </Grid>

@@ -40,14 +40,14 @@ class FooterContainer extends React.Component {
             {<Grid className={classes.navContainer} container alignItems='center'>
               <Grid item xs={12} sm={6}>
                   <Grid container alignItems='center'>
-                      <div className={classes.link}><a href={'/about.html'} rel="noopener noreferrer" target='_blank'>About</a></div>
-                      <div className={classes.link}><a href={'https://github.com/MrChico/stablecoin.services/blob/master/api-doc.md'} rel="noopener noreferrer" target='_blank'>API</a></div>
-                      <div className={classes.link}><a href={'https://github.com/MrChico/stablecoin.services'} rel="noopener noreferrer" target='_blank'>Source</a></div>
+                      <div className={classes.link}><a href="https://docs.rockside.io" rel="noopener noreferrer" target='_blank'>Rockside Relay API</a></div>&nbsp;|&nbsp; 
+                      <div className={classes.link}><a href="https://rockside.io" rel="noopener noreferrer" target='_blank'>About Rockside</a></div>&nbsp;|&nbsp;
+                      <div className={classes.link}><a href="https://github.com/MrChico/stablecoin.services" rel="noopener noreferrer" target='_blank'>Forked from StableCoin.service</a></div>
                   </Grid>
               </Grid>
               <Grid item xs={12} sm={6}>
                   <Grid container className={classes.rightLinkContainer}>
-                      <span>Interacting with the <a href={'https://etherscan.io/address/' + config.DACH + '#code'} rel="noopener noreferrer" target='_blank'>DACH Contract</a></span>
+                      <span>Interacting with the <a href={'https://etherscan.io/address/' + config.WITH_PERMIT + '#code'} rel="noopener noreferrer" target='_blank'>Dach (with permit) Contract</a></span>
                   </Grid>
               </Grid>
             </Grid>}

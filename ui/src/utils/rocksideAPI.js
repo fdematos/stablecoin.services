@@ -8,14 +8,13 @@ export const relayParams = async function() {
         // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
         // credentials: 'same-origin', // include, *same-origin, omit
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
     })
     const response = request.json()
     console.log(response)
     return response
 }
-
 
 
 export const relay = async function(data) {
@@ -31,7 +30,7 @@ export const relay = async function(data) {
         // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
         // credentials: 'same-origin', // include, *same-origin, omit
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(body) // body data type must match "Content-Type" header
     })

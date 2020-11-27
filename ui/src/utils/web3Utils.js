@@ -16,6 +16,10 @@ import {
   gasPrice
 } from '../utils/apiUtils';
 
+import {
+    relayParams
+  } from '../utils/rocksideAPI';
+
 const withPermitAddress  = config.WITH_PERMIT;
 const daiAddress  = config.DAI;
 const potAddress  = config.POT;
@@ -65,6 +69,8 @@ export const getDaiChequeWithPermitData = async function(signedPermit, signedDai
         signedDaiCheque.s,
         [signedPermit.holder, signedPermit.spender, signedPermit.nonce, signedPermit.expiry, signedPermit.allowed, signedPermit.v, signedPermit.r, signedPermit.s]
         ).encodeABI();
+
+        console.log("Signed FEE:"+signedDaiCheque.fee)
     store.set('withPermit.daiCheque', daiChequeData)
 }
 
@@ -142,36 +148,48 @@ export const getFeeData = async function() {
   // console.log('time', timestamp)
     store.set('time', block ? block.timestamp : 0)
     // gas price data from gasstationnetwork
-    const gasPriceData = await gasPrice()
 
-    const gasPriceInGwei = Math.floor(gasPriceData.fast / 10)
+    
+    //const gasPriceData = await gasPrice()
+    //const oldgasPriceInGwei = Math.floor(gasPriceData.fastest / 10)
+
+    //const GweiUSDPrice = await ethPrice.bind(this)() * 1000000000
+     
     // price of eth in dai from ESM (with 18 decimals)
     const rawEthUSDPrice = await web3.eth.getStorageAt('0x81fe72b5a8d1a857d176c3e7d5bd2679a9b85763', 4);
+    
+    const params = await relayParams.bind(this)()
+    const gasPriceInGwei  = Math.floor(Number(params.speeds.fastest.gas_price) / 1000000000)
+   
+    const oldGweiUSDPrice = parseInt(rawEthUSDPrice.slice(34), 16) / 10 ** 9
+    const fastDaiPrice = oldGweiUSDPrice * gasPriceInGwei
 
-    const GweiUSDPrice = parseInt(rawEthUSDPrice.slice(34), 16) / 10 ** 9
-    const fastDaiPrice = GweiUSDPrice * gasPriceInGwei
-    const fastChaiPrice = Math.floor(fastDaiPrice / (chiRaw / 10 ** 27))
+    console.log("GasPrice: "+gasPriceInGwei+" - ethPRice : GweiUSDPrice old "+oldGweiUSDPrice);
+   // const fastChaiPrice = Math.floor(fastDaiPrice / (chiRaw / 10 ** 27))
     // 10% premium to account for failing tx and gas price fluctuations
     const PERMIT_GAS = Math.floor(1.1 * 75000);
     const CHEQUE_GAS = Math.floor(1.1 * 82000);
-    const SWAP_GAS = Math.floor(1.1 * 100000);
-    const CONVERT_GAS = Math.floor(1.1 * 250000);
+    //const SWAP_GAS = Math.floor(1.1 * 100000);
+    //const CONVERT_GAS = Math.floor(1.1 * 250000);
 
-    const daiChequeFee = web3.utils.fromWei(String(fastDaiPrice * (!daiPermitted ? CHEQUE_GAS + PERMIT_GAS : CHEQUE_GAS)))
-    const chaiChequeFee = web3.utils.fromWei(String(fastChaiPrice * (!chaiPermitted ? CHEQUE_GAS + PERMIT_GAS : CHEQUE_GAS)))
-    const daiSwapFee = web3.utils.fromWei(String(fastDaiPrice * (!daiPermitted ? SWAP_GAS + PERMIT_GAS : SWAP_GAS)))
-    const chaiSwapFee = web3.utils.fromWei(String(fastChaiPrice * (!chaiPermitted ? SWAP_GAS + PERMIT_GAS : SWAP_GAS)))
-    const daiConvertFee = web3.utils.fromWei(String(fastDaiPrice * (!daiPermitted ? CONVERT_GAS + PERMIT_GAS : CONVERT_GAS)))
-    const chaiConvertFee = web3.utils.fromWei(String(fastChaiPrice * (!chaiPermitted ? CONVERT_GAS + PERMIT_GAS : CONVERT_GAS)))
+    //const daiChequeFee = web3.utils.fromWei(String(fastDaiPrice * (!daiPermitted ? CHEQUE_GAS + PERMIT_GAS : CHEQUE_GAS)))
+    const daiChequeFee = web3.utils.fromWei(String(fastDaiPrice *  (CHEQUE_GAS + PERMIT_GAS)))
+    
+    //const chaiChequeFee = web3.utils.fromWei(String(fastChaiPrice * (!chaiPermitted ? CHEQUE_GAS + PERMIT_GAS : CHEQUE_GAS)))
+    //const daiSwapFee = web3.utils.fromWei(String(fastDaiPrice * (!daiPermitted ? SWAP_GAS + PERMIT_GAS : SWAP_GAS)))
+    //const chaiSwapFee = web3.utils.fromWei(String(fastChaiPrice * (!chaiPermitted ? SWAP_GAS + PERMIT_GAS : SWAP_GAS)))
+    //const daiConvertFee = web3.utils.fromWei(String(fastDaiPrice * (!daiPermitted ? CONVERT_GAS + PERMIT_GAS : CONVERT_GAS)))
+    //const chaiConvertFee = web3.utils.fromWei(String(fastChaiPrice * (!chaiPermitted ? CONVERT_GAS + PERMIT_GAS : CONVERT_GAS)))
 
-    store.set('cheque.chaiFee', chaiChequeFee)
+    //store.set('cheque.chaiFee', chaiChequeFee)
+    console.log("daiChequeFee : "+daiChequeFee)
     store.set('cheque.daiFee', daiChequeFee)
 
-    store.set('swap.chaiFee', chaiSwapFee)
-    store.set('swap.daiFee', daiSwapFee)
+    //store.set('swap.chaiFee', chaiSwapFee)
+    //store.set('swap.daiFee', daiSwapFee)
 
-    store.set('convert.chaiFee', chaiConvertFee)
-    store.set('convert.daiFee', daiConvertFee)
+   // store.set('convert.chaiFee', chaiConvertFee)
+    //store.set('convert.daiFee', daiConvertFee)
 }
 
 // message signing
@@ -185,6 +203,8 @@ export const createChequeMessageData = function() {
     const walletAddress = store.get('walletAddress')
     const currency = store.get('cheque.selectedCurrency')
     const fee = currency === 'dai' ? Web3.utils.toWei(store.get('cheque.daiFee')) : Web3.utils.toWei(store.get('cheque.chaiFee'))
+    
+    console.log("Singed FEE : "+fee)
     const message = {
         sender: walletAddress,
         receiver: to,
